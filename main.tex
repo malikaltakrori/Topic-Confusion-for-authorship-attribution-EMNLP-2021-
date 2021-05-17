@@ -170,7 +170,7 @@ Recent attempts have been made to investigate authorship attribution in realisti
 \subsection{Theoretical Motivation}
 \begin{figure*}[htb!]
     \centering
-    \includegraphics[width=.85\textwidth, trim={0 5.5cm 0 0},clip]{images/Presentation1.png}
+    \includegraphics[width=.99\textwidth, trim={0 5.5cm 0 0},clip]{images/Presentation1.png}
     \caption{Topic confusion task. We use two topics for training and switch them for testing. Two topics are used for hyperparameter tuning. The topic labels are not available for the classifier during training, and are only used to distribute the samples over the subsets and calculate the scores.}
     \label{fig:topicConf}
 \end{figure*}
@@ -185,7 +185,7 @@ Figure~\ref{causal.perc} shows the assumed relationship diagram between a docume
 \end{flalign}
 During the attribution process, the model is used to predict an author given an anonymous document using Eq.~\ref{Eq.cond}, which follows from Eq.~\ref{Eq.Joint} after applying Bayes rule. The same argument about the topic also applies to the language model, but for simplicity, we only focus on the topic since POS tags have been shown to capture the stylistic variations in language grammar between authors.
 
-Same-topic scenarios assume that the document generation depends only on the author's writing choices, completely ignoring the topic; i.e., no $T$ in the joint distribution, and so, $P(A=a|D)$ is $\propto P(A=a)P(D|A=a)$, but this is unrealistic and unintuitive. In contrast, cross-topic scenarios account for the topics' effects but they assume that the topic is independent from the author. This is clear from the cross-topic setup where the topic values are fixed during training and testing. While this setup managed to reduce the effect of the topic on the attribution process, it does not help in identifying the causes of the errors that resulted from changing the topic between training and testing. 
+Same-topic scenarios assume that the document generation depends only on the author's writing choices, completely ignoring the topic; i.e., no $T$ in the joint distribution, and so, $P(A=a|D)$ is $\propto P(A=a)P(D|A=a)$, but this is unrealistic and unintuitive. In contrast, cross-topic scenarios account for the topics' effects but they assume that the topic is independent from the author. This is clear from the cross-topic setup where the topic values are fixed during training and testing. While this setup highlighted an critical flaw in same-topic scenarios and encouraged classification models to rely less on the topic to do authorship attribution, it does not help in identifying the causes of the errors that resulted from changing the topic between training and testing. 
 
 Instead, we propose a setting in which the topic is dependent on the author, as shown in Figure~\ref{causal.prop}, but this dependence varies between training and testing. Our intuition about the effect of the author's writing style on the topic is the following. Consider a topic that has a unique word distribution which can be captured by analyzing a fairly large corpus of documents on that topic. An author writing on that topic will likely generate a slightly different distribution in their document because the limited document's length will force an author to choose a subset of words that describe that specific topic. This topic distribution will also differ across documents written by different authors because words have synonyms and the same idea can be worded in multiple ways. 
 
@@ -211,11 +211,11 @@ After creating the training, validation, and testing sets, we train models for a
 
 The advantage to this setup is that, we can sub-divide the errors that the model makes on the validation and test sets. In particular, we count the following cases:
 
-\noindent$1.$ \textbf{Correct}: The number of correctly classified samples. Dividing this number by the total number of predicted samples is the model's unweighted classification accuracy.
+\noindent$1.$ \textbf{Correct (\%)}: The number of correctly classified samples divided by the total number of predicted samples.
 
-\noindent$2.$ \textbf{Same-group error}: The number of misclassified samples to authors within the same group as the true author.
+\noindent$2.$ \textbf{Same-group error (\%)}: The number of misclassified samples to authors within the same group as the true author divided by the total number of predicted samples.
 
-\noindent$3.$\textbf{Cross-group error}: The number of misclassified samples to authors in the other group.
+\noindent$3.$\textbf{Cross-group error (\%)}: The number of misclassified samples to authors in the other group divided by the total number of predicted samples.
 
 Distinguishing these types of errors allows us to investigate whether features in a classifier tend to be indicative of writing style or topic. In particular, features that are invariant to the topic and only capture the authors' writing styles should lead a model to correctly identify the author in the test set. Conversely, features that capture the topic instead of the writing style would lead a model to classify according to topic, resulting in cross-group errors. Finally, a model that fails for other reasons---either because the writing styles are too similar or because the used features can only partially capture the writing styles---will misclassify samples to authors within the same group.
 
@@ -244,11 +244,15 @@ The number of collected articles is provided in Table~\ref{tab:myData_short}. De
 \end{table}
 
 \section{Authorship Attribution Models\label{subsec:QWS}}
+In this section, we discuss two groups of authorship attribution models. The first group contains a set of classical models that use hand-engineered features and a classification algorithm. The second group comprises a set of neurally-inspired models motivated by recent advancements in various natural language processing tasks. Such models are considered end-to-end system where the feature representation is done as part of the model as opposed to being hand-crafted and provided to the model. 
+
 
 \subsection{Classical Features with SVM} 
-
+This approach approach uses a set of classical, hand-engineered features with a non-neural classification algorithm. We experiment with a wide spectrum of features that include both stylometric features and $n$-gram features. Early work on authorship attribution proposed using stylometric features to represent an author's writing Style. On the other hand, $n$-gram features were used with most text classification tasks until recent neural representations replaced them.
 
 With all the following features, we used the instance-based approach~\citep{Stamatatos.e:2009} where a writing style is extracted from every sample separately. A classification model is trained on the extracted features to predict the authors of new, unseen samples. We used~\citet{scikit-learn}'s implementation of linear Support Vector Machines (SVM) as the classification algorithm\footnote{Appendix~\ref{appOptimal}, Tables~\ref{hypers} and~\ref{optimalTable} show the range of values and the average optimal parameters that are fine-tuned on the validation set, respectively.}, which is a common choice in authorship attribution~\citep{Stamatatos.E:2017}. 
+
+Common classification 
 
 Note that the literature has thoroughly compared and contrasted the performance of different classification techniques such as Na\"ive Bayes, decision trees and SVM~\citep{Ding.S:2015, malik:2018} with different kernels. This, therefore, is excluded from our work.   
 
@@ -261,10 +265,13 @@ Using $n$-grams is a common approach to represent documents in authorship attrib
 \paragraph{Masking~\citep{Stamatatos.E:2017,stamatatos2018masking}.}
 This preprocessing technique replaces every character in words to be masked with a (*) and replaces all the digits with a ($\#$). Masked words are chosen based on their frequency in the British National Corpus (BNC), an external dataset. After Masking, tokens are put back together to recreate the original document structure before extracting $n$-gram features. 
 
+\paragraph{Combining features.} One advantage to using hand-engineered features on the sample level is that these features can easily be combined. First, we evaluated the combination of the stylometric features and POS $n$-grams. Next, we combined both these features to the other classical features mentioned above. 
+
+
 \subsection{Pretrained Language Models}
 
 \paragraph{Few-Shot BERT and RoBERTa.}
-This is an example of a few-shot classification with pretrained language models. We used a sequence classification model with a pretrained embeddings layer from the transformer-based contextual language models BERT~\citet{devlin2019bert} and RoBERTa~\citep{liu2019roberta} followed by a classification layer. Given the huge size of these models and the small number of training samples, we decided to freeze the embeddings and train only the classification layer. We used the implementation provided by the HuggingFace~\citep{Wolf2019HuggingFacesTS} library\footnote{\url{https://huggingface.co}}.
+This is an example of a few-shot classification with pretrained language models. We used a sequence classification model with a pretrained embeddings layer from the transformer-based non-autoregressive contextual language models BERT~\citet{devlin2019bert} and RoBERTa~\citep{liu2019roberta} followed by a pooling layer then a classification layer. Given the huge size of these models and the small number of training samples, we decided to freeze the embeddings and train only the classification layer. We used the implementation provided by the HuggingFace~\citep{Wolf2019HuggingFacesTS} library\footnote{\url{https://huggingface.co}}.
 
 \paragraph{Author Profile (AP) BERT and RoBERTa~\citep{Barlas2020,Barlas2021}.} 
 We trained a separate neural language model for each author in the dataset where the embedding layer is initialized with embeddings from BERT and RoBERTa. To predict the author, we used each language model --or author profile-- to calculate the average perplexity of the model for an investigated document. Before attribution, however, the perplexity scores are normalized using a normalization vector ($n$) to make up for the biases in the output layer of each language model, where $n_i$ equals the average perplexity of profile $A_i$ on the normalization corpus.
@@ -272,59 +279,58 @@ We trained a separate neural language model for each author in the dataset where
 \citet{Barlas2020,Barlas2021} used two normalization corpora during inference: the training set (K) and the testing set without labels (U). The author with the lowest normalized perplexity score is the most plausible author of the investigated document. Note that assuming the availability of a test set rather than a single document is unrealistic in authorship attribution even if labels were not provided. We evaluated both cases for the sake of completeness.  
 
 \section{\label{subsec:eval}Evaluation Procedure}
-For each set of features, we used the setup explained in Section~\ref{sec:confTask} and report the average score for 100 runs. In each run, we randomly ordered the topics, selected the authors, and distributed the authors to the groups. This setting is considered as one single experiment. We reduced the variance by repeating every single experiment ten times\footnote{We trained FS BERT and FS RoBERTa only once.}, and we reported the average balanced accuracy score.
+For each set of features, we used the setup explained in Section~\ref{sec:confTask} to create a 100 different configurations. For each configuration, we randomly ordered the topics, selected 12 out of the 13 available authors, and distributed the authors to the groups. This setting is considered as one single experiment. To account for randomness in the classification algorithm, we repeated every single experiment ten times\footnote{We trained FS BERT and FS RoBERTa only once.}, and reported the average balanced accuracy score and standard deviation.
 
 We decided to omit one author and use the remaining twelve out of the available 13 authors to balance the groups. With this split, the probability of picking the correct author is $\frac{1}{12}$, the likelihood of choosing a wrong author in the same group is $\frac{5}{12}$, and the probability of picking a wrong author in the other group is $\frac{6}{12}$. This case applies if the true author was in either group 1 or group 2. However, suppose we were to use all the 13 authors and divide them into two groups of six and seven authors, respectively. In that case, the probabilities will differ depending on whether the actual author is in the group with six authors or seven authors. In that case, we will need to re-weight the errors based on their probability, and that will complicate the results as we will not be talking about the exact number of samples.  
 
 \begin{table*}[htb]
 \centering
-\caption{\label{tbl:topicConf}Results ($\pm$ SD) on the topic confusion task. The first row of each group of rows corresponds to an existing method. The last row is the performance at random. (\textbf{Boldface}: is the best result per column. $\uparrow$ Higher is better. $\downarrow$ Lower is better. \%: Percentage. S: number of samples. \textcolor{red}{$^{*}$}State of the art. \textcolor{red}{$^{**}$} Has access to the (unlabeled) test set.)
+\caption{\label{tbl:topicConf}Results (\% $\pm$ SD) on the topic confusion task and the cross-topic scenario. The first row of each group of rows corresponds to an existing method. The last row is random performance. (\textbf{Boldface}: best result per column. $\uparrow$ Higher is better. $\downarrow$ Lower is better. \%: Percentage. \textcolor{red}{$^{*}$}State of the art. \textcolor{red}{$^{**}$} Has access to the (unlabeled) test set.)
 }
-\begin{tabular}{l|l|c|ccc}
+\begin{tabular}{l|ccc|||c}
 \hline
-\multicolumn{6}{c}{\textbf{Topic Confusion}}    \\\hline
-\multirow{2}{*}{\textbf{\#}} & \multirow{2}{*}{\textbf{Models}} & \textbf{$\uparrow$ Accuracy} & $\uparrow$ \textbf{Correct} & $\downarrow$ \textbf{Same-group} & $\downarrow$ \textbf{Cross-group} \\%& $\uparrow$ \textbf{Same}\\ 
-&  &  \textbf{(\%)} & \textbf{(S)}& \textbf{Error (S)} & \textbf{Error (S)}  \\\hline % &\textbf{Topic}\\\hline
-1) & Stylo. &  62.7 $\pm$ 4.0 & 73.8 $\pm$ 4.9 & 18.3 $\pm$ 3.2 & 24.8 $\pm$ 3.5 \\
-\hline
-2) & POS $n$-grams & 71.4 $\pm$ 4.0&	84.2 $\pm$ 5.3& 13.4 $\pm$ 3.4	& 	19.4 $\pm$ 3.9\\
-3) & \phantom{hi} + Stylo       & 79.2 $\pm$ 3.5 & 93.1 $\pm$ 4.7&   9.8 $\pm$ 3.0 & 14.1 $\pm$ 3.3   \\
-\hline
+& \multicolumn{3}{c|||}{\textbf{Topic Confusion}}& \textbf{Cross-topic}    \\\hline
+\multirow{2}{*}{\textbf{Models}}  & $\uparrow$ \textbf{Correct} & $\downarrow$ \textbf{Same-group} & $\downarrow$ \textbf{Cross-group} & \textbf{$\uparrow$ Accuracy} \\
+ &  & \textbf{Error} & \textbf{Error} &   \\\hline\hline 
+ 
+ Stylo. &   73.8 $\pm$ 4.9 & 18.3 $\pm$ 3.2 & 24.8 $\pm$ 3.5 &  61.2 $\pm$ 3.1\\\hline
+ POS $n$-grams &	84.2 $\pm$ 5.3& 13.4 $\pm$ 3.4	& 	19.4 $\pm$ 3.9& 71.0 $\pm$ 3.2\\
+\phantom{hi} + Stylo       & 93.1 $\pm$ 4.7&   9.8 $\pm$ 3.0 & 14.1 $\pm$ 3.3 & 79.2 $\pm$ 2.7  \\\hline
 						
-4) & Char $n$-grams  & 69.6 $\pm$ 6.5& 82.0 $\pm$ 7.6 & 7.9 $\pm$ 2.8 & 27.1 $\pm$ 7.6  \\			
-5) & \phantom{hi}+ Stylo & 72.6 $\pm$ 6.5 & 85.4 $\pm$  7.5& 7.6 $\pm$ 3.0 & 24.0 $\pm$ 7.1 \\
-6) &\phantom{hi}+ Stylo \& POS & 76.4 $\pm$ 5.8 & 89.8 $\pm$ 7.1 & \textbf{7.0} $\pm$ 2.7 & 20.1 $\pm$ 6.5 \\\hline
+ Char $n$-grams  & 82.0 $\pm$ 7.6 & 7.9 $\pm$ 2.8 & 27.1 $\pm$ 7.6 & 77.3 $\pm$ 2.8 \\			
+ \phantom{hi}+ Stylo & 85.4 $\pm$  7.5& 7.6 $\pm$ 3.0 & 24.0 $\pm$ 7.1 & - \\
+\phantom{hi}+ Stylo \& POS & 89.8 $\pm$ 7.1 & \textbf{7.0} $\pm$ 2.7 & 20.1 $\pm$ 6.5 & 82.8 $\pm$ 2.7\\\hline
 
-7) & Word $n$-grams & 62.2 $\pm$ 7.1 & 73.1 $\pm$ 8.6 & 9.3 $\pm$ 3.2 & 34.6 $\pm$ 8.6 \\
-8) & \phantom{hi}+ Stylo & 72.0 $\pm$ 6.2 & 84.7 $\pm$ 7.5 & 8.5 $\pm$ 2.7 & 23.8 $\pm$ 7.2 \\
-9) & \phantom{hi}+ Stylo \& POS  & 80.0 $\pm$ 4.8 & 93.9 $\pm$ 5.8 & 8.3 $\pm$ 3.1 & 14.7 $\pm$ 4.9 \\
-\hline\hline
+ Word $n$-grams & 73.1 $\pm$ 8.6 & 9.3 $\pm$ 3.2 & 34.6 $\pm$ 8.6 & 77.7 $\pm$ 2.7\\
+ \phantom{hi}+ Stylo & 84.7 $\pm$ 7.5 & 8.5 $\pm$ 2.7 & 23.8 $\pm$ 7.2 & - \\
+ \phantom{hi}+ Stylo \& POS  & 93.9 $\pm$ 5.8 & 8.3 $\pm$ 3.1 & 14.7 $\pm$ 4.9 & \textbf{83.3} $\pm$ 2.6\\
+\hline
 			
-10) & Masking (Ch.)\textcolor{red}{$^{*}$} & 79.1 $\pm$ 5.3 & 92.9 $\pm$ 6.5 & 7.9 $\pm$ 3.2 & 16.1 $\pm$ 5.8  \\
-11) & \phantom{hi}+ Stylo \& POS & 82.8 $\pm$ 4.3	 & 97.2 $\pm$ 5.6 & 7.5 $\pm$ 3.2 & 12.2 $\pm$ 4.1 \\\hline
+  Masking (Ch.)\textcolor{red}{$^{*}$} & 92.9 $\pm$ 6.5 & 7.9 $\pm$ 3.2 & 16.1 $\pm$ 5.8  & 80.9 $\pm$ 2.6\\
+  \phantom{hi}+ Stylo \& POS & 97.2 $\pm$ 5.6 & 7.5 $\pm$ 3.2 & 12.2 $\pm$ 4.1 & 83.2  $\pm$ 3.3\\\hline
 
-12) & Masking (W.)  & 76.3 $\pm$ 5.6 & 89.8 $\pm$ 6.7 & 9.3 $\pm$ 3.4 & 17.9 $\pm$ 6.7 \\
-13) & \phantom{hi}+ Stylo \& POS & \textbf{83.0} $\pm$ 4.0 & \textbf{97.5} $\pm$ 5.2 & 7.8 $\pm$ 3.2 & \textbf{11.7} $\pm$ 3.7 \\
+ Masking (W.)  & 89.8 $\pm$ 6.7 & 9.3 $\pm$ 3.4 & 17.9 $\pm$ 6.7 & 77.9 $\pm$ 4.0\\
+ \phantom{hi}+ Stylo \& POS & \textbf{97.5} $\pm$ 5.2 & 7.8 $\pm$ 3.2 & \textbf{11.7} $\pm$ 3.7 & 82.8 $\pm$ 3.3\\
 
 \hline \hline
-14) & FS BERT   & 32.9 $\pm$ 6.0  & 38.7 $\pm$ 6.7 & 23.3  $\pm$ 6.6 & 55.0  $\pm$ 10.5 \\
-15) & BERT AP (K) & 51.6 $\pm$ 7.4 & 60.3 $\pm$ 8.8 & 9.6 $\pm$ 3.6 & 47.0 $\pm$ 10.0\\
-16) & BERT AP (U\textcolor{red}{$^{**}$}) & 52.1 $\pm$ 7.0 & 60.9 $\pm$ 8.5 & 9.8 $\pm$ 3.7 & 46.3 $\pm$ 10.0\\
+ FS BERT   & 38.7 $\pm$ 6.7 & 23.3  $\pm$ 6.6 & 55.0  $\pm$ 10.5 & 37.5 $\pm$ 3.5\\
+ BERT AP (K) & 60.3 $\pm$ 8.8 & 9.6 $\pm$ 3.6 & 47.0 $\pm$ 10.0 & 67.3 $\pm$ 4.4\\
+ BERT AP (U\textcolor{red}{$^{**}$}) & 60.9 $\pm$ 8.5 & 9.8 $\pm$ 3.7 & 46.3 $\pm$ 10.0 & 71.1 $\pm$ 3.3\\
 
 \hline
-17) & FS RoBERTa & 39.5 $\pm$ 7.6 & 46.6 $\pm$ 8.8 & 15.3 $\pm$ 6.0 & 55.1 $\pm$ 12.7 \\
-18) & RoBERTa AP (K) & 57.8 $\pm$ 7.1 & 67.6 $\pm$ 8.3 & 8.3 $\pm$ 3.4 & 41.0 $\pm$ 9.9\\
-19) & RoBERTa AP (U\textcolor{red}{$^{**}$}) & 59.0 $\pm$ 7.0 & 68.9 $\pm$ 8.3 & 8.0 $\pm$ 3.3 & 40.1 $\pm$ 9.7\\
+ FS RoBERTa & 46.6 $\pm$ 8.8 & 15.3 $\pm$ 6.0 & 55.1 $\pm$ 12.7 & 51.1 $\pm$ 3.4\\
+ RoBERTa AP (K) & 67.6 $\pm$ 8.3 & 8.3 $\pm$ 3.4 & 41.0 $\pm$ 9.9 & 70.8 $\pm$ 2.0\\
+ RoBERTa AP (U\textcolor{red}{$^{**}$}) & 68.9 $\pm$ 8.3 & 8.0 $\pm$ 3.3 & 40.1 $\pm$ 9.7 & 75.8 $\pm$ 3.8\\
 
 \hline\hline
-& \multirow{1}{*}{\textit{``random chance"}} & 8.3 & 9.4 & 48.7 & 58.5 \\\hline
+ \multirow{1}{*}{\textit{``random chance"}} & 9.4 & 48.7 & 58.5 & 7.7\\\hline
 \end{tabular}
 
 \end{table*}
 
 \section{Results and Discussion}
 \subsection{Topic Confusion Task}
-Table~\ref{tbl:topicConf} shows the results on the topic confusion task. Accuracy is the number of correctly classified samples divided by the total number of classified samples. Correct, same-group and cross-group errors are the proposed measured in section~\ref{subsec:proposed} 
+Table~\ref{tbl:topicConf} shows the results on the topic confusion task using the proposed measured in section~\ref{subsec:proposed}. Correct is the percentage of samples that were correctly classified, same-group error is the percentage of samples that were attributed to the wrong author but within the same group as the correct author, and finally cross-group error is the percentage of samples that were attributed to the wrong author and to the author group that does not contain the correct author ---caused by the change in the topic---. 
 
 We start by comparing the standard features in authorship attribution: (1) stylometric vs. (4) character- and (7) word-level $n$-gram features. We see why stylometric features were out-favoured by $n$-gram features if we look only at the accuracy. Character $n$-grams achieve higher accuracy while word-level $n$-grams perform similarly but are easier to collect and do not require adapting between different languages or media. However, splitting the error shows that stylometric features have the lowest cross-group error caused by the topic shift. The topic shift does not cause the low performance of stylometric features but rather because they partially capture the writing style.
 
@@ -334,7 +340,7 @@ Furthermore, all the classical features (1, 2, 4, and 7) Part-Of-Speech $n$-gram
 
 Next, we look at the effect of masking as a preprocessing technique. Specifically, we compare character- and word-level $n$-gram features before (4 and 7) and after masking (10 and 12). Masking infrequent words is evident in the cross-group error between character $n$-grams and masking on the character-level as well as the word $n$-grams and masking on the word level. Table~\ref{tbl:topicConf} shows the same-group error remained fixed while cross-group error decreased by 11 and 17 samples for the character- and the word-level, respectively. 
 
-\paragraph{Combining features.} One advantage to using hand-engineered features on the sample level is that these features can easily be combined. First, we combined the stylometric features and POS $n$-grams and observed (3) a decrease in both same- and cross-group errors, which translates to better writing style representation and lower topical bias. 
+% \paragraph{Combining features.} One advantage to using hand-engineered features on the sample level is that these features can easily be combined. First, we combined the stylometric features and POS $n$-grams and observed (3) a decrease in both same- and cross-group errors, which translates to better writing style representation and lower topical bias. 
 
 Next, we evaluated the effect of combining both stylometric features and POS $n$-gram features with character- and word-level $n$-grams with and without masking (rows 6, 9, 11, and 13). The results of combining both stylometric features and POS $n$-grams with all the other features have decreased the cross-group error significantly, which resembles less confusion over the topic. On the other hand, the same-group error was reduced by merely one sample at max in most cases. 
 
@@ -344,47 +350,47 @@ It is worth noting that masking on the character level performed better than mas
 
 Indeed, pretrained neural language models are not suited for authorship attribution. Their goal is to learn word representations that capture the similarity between words that appear in a similar context, something that one-hot encoding does not capture. In authorship, however, words must both appear in the same context and be used by that author to have similar representations. For example, `color' and `colour' are the same word but with different spelling based on whether American or British English is being used. Ideally, these two words would have very similar embeddings, if not identical ones. The distinction between the two is critical because it indicates the author's identity or the language system they use. Authorship attribution techniques highlight these differences and use them to identify the most plausible author of an anonymous document. 
 
-\subsection{The Traditional Cross-topic Scenario}
+\subsection{Comparing the Performance on the Cross-Topic Scenario}
 To validate our findings in a realistic scenario, we compare the performance in the cross-topic scenario on the Guardian dataset. Note that it is common to do the evaluation on one of the two cross-topic authorship attribution datasets~\citep{goldstein2009person,Stamatatos.E:2013} similar to~ \citep{goldstein2009person,Sapkota.U:2014,Stamatatos.E:2017, stamatatos2018masking,Barlas2020,Barlas2021}
 
-\begin{table}[htb]
-\caption{\label{tbl:Xtopic}Results on the traditional, cross-topic scenario. \textbf{Boldface} indicates the best result per column. ($\uparrow$ Higher is better. \textcolor{red}{$^{*}$}State of the art. \textcolor{red}{$^{**}$} Has access to the (unlabeled) test set.)}
-\centering
-\begin{tabular}{l|l|c }
-\hline
-\multicolumn{3}{c}{\textbf{Cross-topic}}    \\\hline
-\# & \textbf{Models} & \textbf{Accuracy (\%) $\uparrow$ } \\\hline
-1) & Stylo                & 61.2 $\pm$ 3.1\\\hline
+% \begin{table}[htb]
+% \caption{\label{tbl:Xtopic}Results on the traditional, cross-topic scenario. \textbf{Boldface} indicates the best result per column. ($\uparrow$ Higher is better. \textcolor{red}{$^{*}$}State of the art. \textcolor{red}{$^{**}$} Has access to the (unlabeled) test set.)}
+% \centering
+% \begin{tabular}{l|l|c }
+% \hline
+% \multicolumn{3}{c}{\textbf{Cross-topic}}    \\\hline
+% \# & \textbf{Models} & \textbf{Accuracy (\%) $\uparrow$ } \\\hline
+% 1) & Stylo                & 61.2 $\pm$ 3.1\\\hline
 
-2) & POS $n$-grams   & 71.0 $\pm$ 3.2\\
-3) & \phantom{hi}+ Stylo         & 79.2 $\pm$ 2.7\\\hline
+% 2) & POS $n$-grams   & 71.0 $\pm$ 3.2\\
+% 3) & \phantom{hi}+ Stylo         & 79.2 $\pm$ 2.7\\\hline
 
-4) & Char $n$-grams   & 77.3 $\pm$ 2.8\\
-% \phantom{hi}+ Stylo  & - \\
-5) & \phantom{hi}+ Stylo \& POS   & 82.8 $\pm$ 2.7\\\hline
+% 4) & Char $n$-grams   & 77.3 $\pm$ 2.8\\
+% % \phantom{hi}+ Stylo  & - \\
+% 5) & \phantom{hi}+ Stylo \& POS   & 82.8 $\pm$ 2.7\\\hline
 
-6) & Word $n$-grams   & 77.7 $\pm$ 2.7\\
-% \phantom{hi}+ Stylo   & - \\
-7) & \phantom{hi}+ Stylo \& POS    & \textbf{83.3} $\pm$ 2.6\\\hline
+% 6) & Word $n$-grams   & 77.7 $\pm$ 2.7\\
+% % \phantom{hi}+ Stylo   & - \\
+% 7) & \phantom{hi}+ Stylo \& POS    & \textbf{83.3} $\pm$ 2.6\\\hline
 
-8) & Masking (Ch.)\textcolor{red}{$^{*}$}      & 80.9 $\pm$ 2.6\\
-9) & \phantom{hi}+ Stylo \& POS  & 83.2  $\pm$ 3.3\\\hline
+% 8) & Masking (Ch.)\textcolor{red}{$^{*}$}      & 80.9 $\pm$ 2.6\\
+% 9) & \phantom{hi}+ Stylo \& POS  & 83.2  $\pm$ 3.3\\\hline
 
-10) & Masking (W.)    & 77.9 $\pm$ 4.0\\
-11) & \phantom{hi}+ Stylo \& POS    & 82.8 $\pm$ 3.3\\
-\hline
-12) & FS BERT  & 37.5 $\pm$ 3.5\\
-13) & BERT AP (K) & 67.3 $\pm$ 4.4\\
-14) & BERT AP (U\textcolor{red}{$^{**}$}) & 71.1 $\pm$ 3.3\\
-\hline
-15) & FS RoBERTa  & 51.1 $\pm$ 3.4\\
-16) & RoBERTa AP (K) & 70.8 $\pm$ 2.0\\
-17) & RoBERTa AP (U\textcolor{red}{$^{**}$}) & 75.8 $\pm$ 3.8\\
-\hline
-\hline
-& \multirow{1}{*}{\textit{``random chance"}}   & 7.7 \\\hline
-\end{tabular}
-\end{table}
+% 10) & Masking (W.)    & 77.9 $\pm$ 4.0\\
+% 11) & \phantom{hi}+ Stylo \& POS    & 82.8 $\pm$ 3.3\\
+% \hline
+% 12) & FS BERT  & 37.5 $\pm$ 3.5\\
+% 13) & BERT AP (K) & 67.3 $\pm$ 4.4\\
+% 14) & BERT AP (U\textcolor{red}{$^{**}$}) & 71.1 $\pm$ 3.3\\
+% \hline
+% 15) & FS RoBERTa  & 51.1 $\pm$ 3.4\\
+% 16) & RoBERTa AP (K) & 70.8 $\pm$ 2.0\\
+% 17) & RoBERTa AP (U\textcolor{red}{$^{**}$}) & 75.8 $\pm$ 3.8\\
+% \hline
+% \hline
+% & \multirow{1}{*}{\textit{``random chance"}}   & 7.7 \\\hline
+% \end{tabular}
+% \end{table}
 
 Table~\ref{tbl:Xtopic} shows that a combination of stylometric features, POS- and word-level $n$-grams (7), outperforms the state-of-the-art, which is (8) masking the least frequent words followed by word-level $n$-gram features. Adding stylometric features and POS-level $n$-grams to (9) masking (Ch) and (11) masking (W) also achieved better performance than state of the art. Still, the difference was statistically significant only when we compared (8) masking (Ch.) and (7) ($P=0.04$). Appendix~\ref{additional} contains the experimental setup, detailed results and analysis supported with statistical significance tests and an ablation study on the cross-topic scenario.
 
