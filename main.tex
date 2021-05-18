@@ -207,11 +207,11 @@ We propose a new task to measure the performance of authorship attribution techn
 
 First, we divide the authors into two equal-sized groups: group 1 and group 2. Next to create the training set, we select two random topics and use writing samples on topic 1 for the authors in group 1 and writing samples on topic 2 for the authors in group 2. For the testing set, we flip the topics configuration that we used for the training set. We use writing samples on topic 2 (instead of 1) for the authors in group 1 and samples on topic 1 (instead of 2) for the authors in group 2. Finally, we use the remaining writing samples on the unused topics for the authors in both groups for the validation set. Figure~\ref{fig:topicConf} shows the setup for the proposed task as an example of having four authors and four topics.
 
-After creating the training, validation, and testing sets, we train models for authorship attribution. First, the features are extracted from the writing samples. Second, a classification model is trained on the training samples, tuned on the validation set to pick the best hyperparameters, and tested on the testing set. Note that the classifier does not have access to any information about the setup, such as the groups configuration or the topic labels. 
+% After creating the training, validation, and testing sets, we train models for authorship attribution. First, the features are extracted from the writing samples. Second, a classification model is trained on the training samples, tuned on the validation set to pick the best hyperparameters, and tested on the testing set. Note that the classifier does not have access to any information about the setup, such as the groups configuration or the topic labels. 
 
 The advantage to this setup is that, we can sub-divide the errors that the model makes on the validation and test sets. In particular, we count the following cases:
 
-\noindent$1.$ \textbf{Correct (\%)}: The number of correctly classified samples divided by the total number of predicted samples.
+\noindent$1.$ \textbf{Correct (\%)}: The ratio of correctly classified samples to the total number of predicted samples.
 
 \noindent$2.$ \textbf{Same-group error (\%)}: The number of misclassified samples to authors within the same group as the true author divided by the total number of predicted samples.
 
@@ -222,7 +222,13 @@ Distinguishing these types of errors allows us to investigate whether features i
 % Compared to the standard cross-topic setting, this task can help us understand how the topic affects certain features by showing whether the error is caused by the topic or the features themselves, while the cross-topic setting would give a more realistic performance compared to the same-topic, but without any insights on why we got such results. 
 
 \section{Dataset\label{subsec:dataset}}
-We present an extended, curated, and relatively balanced version of the Guardian dataset.\footnote{Appendix~\ref{dataColl} describes the data collection procedure, which documents were excluded and the reason for exclusion, a list of the articles URLs, and the code to scrape and preprocess the articles to the format which we used.} One motivation is that as we try to understand the effect of the topic on the attribution process, we need to isolate any external factors that may affect the performance and make the results noisy. For example, in the topic confusion task, we have to use topics with writing samples from all the authors. Otherwise, the model could learn to favour one topic versus the other during training, while on test time, it will have author samples that it did not see during training. Based on that, it will be hard to tell whether these samples will be misclassified due to lack of training samples or due to a strong topic effect on the attribution process. Although datasets in real life can be imbalanced, this issue can be addressed by randomly excluding some writing samples to make the dataset imbalanced or using proper performance metrics for imbalanced datasets such as weighted accuracy, precision, recall and F-Score. 
+We present an extended, curated, and relatively balanced version of the Guardian dataset.\footnote{Appendix~\ref{dataColl} describes the data collection procedure, which documents were excluded and the reason for exclusion, a list of the articles URLs, and the code to scrape and preprocess the articles to the format which we used.} 
+One motivation is that the articles in the commonly used version of the dataset contained some HTML artifacts and meta-data from the Guardian's website, and had a number of its articles either on the wrong topic, or written by authors that are not in the dataset. Because of that, we retrieved the original articles, and added more articles to balance the number of writing samples per author on each topic. We maintained the same upper limit on the number of documents per author as the original dataset.
+
+Another reason is that as we try to understand the effect of the topic on the attribution process, we need to isolate any external factors that may affect the performance and make the results noisy. For example, in the topic confusion task, we have to use topics with writing samples from all the authors. Otherwise, the model could learn to favour one topic versus the other during training, while on test time, it will have author samples that it did not see during training. Based on that, it will be hard to tell whether these samples will be misclassified due to lack of training samples or due to a strong topic effect on the attribution process. Although datasets in real life can be imbalanced, this issue can be addressed by randomly excluding some writing samples to make the dataset imbalanced or using proper performance metrics for imbalanced datasets such as weighted accuracy, precision, recall and F-Score. 
+
+% Another reason is that the articles in the commonly used version of the dataset contained some HTML artifacts and meta-data from the Guardian's website, and had a number of its articles either on the wrong topic, or written by authors that are not in the dataset. Because of that, we retrieved the original articles, and added more articles to balance the number of writing samples per author on each topic. We maintained the same upper limit on the number of documents per author as the original dataset~\footnote{Appendix~\ref{dataColl} describes the data collection procedure, which documents were excluded and the reason for exclusion, a list of the articles URLs, and the code to scrape and preprocess the articles to the format which we used.}. The total number of collected articles are provided in Table~\ref{tab:myData_short}.   
+% %\footnote{The supplementary material contains extensive details on the data collection process including which documents were excluded from the previous dataset and reason for exclusion. Additionally, we provided a list of the articles URLs with code to scrape them from the Guardian API and convert them to the format which we used in our experiments.}
 
 The number of collected articles is provided in Table~\ref{tab:myData_short}. Descriptive statistics are provided in Appendix~\ref{additional}, Table~\ref{tab:myData}.
 \begin{table}[ht]
@@ -252,9 +258,7 @@ This approach approach uses a set of classical, hand-engineered features with a 
 
 With all the following features, we used the instance-based approach~\citep{Stamatatos.e:2009} where a writing style is extracted from every sample separately. A classification model is trained on the extracted features to predict the authors of new, unseen samples. We used~\citet{scikit-learn}'s implementation of linear Support Vector Machines (SVM) as the classification algorithm\footnote{Appendix~\ref{appOptimal}, Tables~\ref{hypers} and~\ref{optimalTable} show the range of values and the average optimal parameters that are fine-tuned on the validation set, respectively.}, which is a common choice in authorship attribution~\citep{Stamatatos.E:2017}. 
 
-Common classification 
-
-Note that the literature has thoroughly compared and contrasted the performance of different classification techniques such as Na\"ive Bayes, decision trees and SVM~\citep{Ding.S:2015, malik:2018} with different kernels. This, therefore, is excluded from our work.   
+Different classification algorithms can be used with these features. Examples are Na\"ive Bayes, decision trees and SVM. We chose to use SVM with linear kernel based on its favorable performance in previous work~\citep{Sapkota.U:2014,sapkota2015not,Ding.S:2015,Stamatatos.E:2017,stamatatos2018masking}. 
 
 \paragraph{Stylometric Features~\citep{Iqbal.F:2008,Iqbal.F:2013}.}
 We evaluate 371 features including syntactic features and lexical features on both character- and word-level. These features are listed in Appendix~\ref{styloFeat}-Table~\ref{tbl:features}.
@@ -278,80 +282,82 @@ We trained a separate neural language model for each author in the dataset where
 
 \citet{Barlas2020,Barlas2021} used two normalization corpora during inference: the training set (K) and the testing set without labels (U). The author with the lowest normalized perplexity score is the most plausible author of the investigated document. Note that assuming the availability of a test set rather than a single document is unrealistic in authorship attribution even if labels were not provided. We evaluated both cases for the sake of completeness.  
 
-\section{\label{subsec:eval}Evaluation Procedure}
-For each set of features, we used the setup explained in Section~\ref{sec:confTask} to create a 100 different configurations. For each configuration, we randomly ordered the topics, selected 12 out of the 13 available authors, and distributed the authors to the groups. This setting is considered as one single experiment. To account for randomness in the classification algorithm, we repeated every single experiment ten times\footnote{We trained FS BERT and FS RoBERTa only once.}, and reported the average balanced accuracy score and standard deviation.
-
-We decided to omit one author and use the remaining twelve out of the available 13 authors to balance the groups. With this split, the probability of picking the correct author is $\frac{1}{12}$, the likelihood of choosing a wrong author in the same group is $\frac{5}{12}$, and the probability of picking a wrong author in the other group is $\frac{6}{12}$. This case applies if the true author was in either group 1 or group 2. However, suppose we were to use all the 13 authors and divide them into two groups of six and seven authors, respectively. In that case, the probabilities will differ depending on whether the actual author is in the group with six authors or seven authors. In that case, we will need to re-weight the errors based on their probability, and that will complicate the results as we will not be talking about the exact number of samples.  
-
-\begin{table*}[htb]
+\begin{table*}[!htb]
 \centering
-\caption{\label{tbl:topicConf}Results (\% $\pm$ SD) on the topic confusion task and the cross-topic scenario. The first row of each group of rows corresponds to an existing method. The last row is random performance. (\textbf{Boldface}: best result per column. $\uparrow$ Higher is better. $\downarrow$ Lower is better. \%: Percentage. \textcolor{red}{$^{*}$}State of the art. \textcolor{red}{$^{**}$} Has access to the (unlabeled) test set.)
+\caption{\label{tbl:topicConf} Average results (SD) on the topic confusion task and the cross-topic scenario. The last row is random performance. (\textbf{Boldface}: Best result per column. $\uparrow$ Higher is better. $\downarrow$ Lower is better. \%: Percentage. \textcolor{red}{$^{*}$}State of the art. \textcolor{red}{$^{**}$} Has access to the (unlabeled) test set.)
 }
 \begin{tabular}{l|ccc|||c}
 \hline
 & \multicolumn{3}{c|||}{\textbf{Topic Confusion}}& \textbf{Cross-topic}    \\\hline
 \multirow{2}{*}{\textbf{Models}}  & $\uparrow$ \textbf{Correct} & $\downarrow$ \textbf{Same-group} & $\downarrow$ \textbf{Cross-group} & \textbf{$\uparrow$ Accuracy} \\
  &  & \textbf{Error} & \textbf{Error} &   \\\hline\hline 
- 
- Stylo. &   73.8 $\pm$ 4.9 & 18.3 $\pm$ 3.2 & 24.8 $\pm$ 3.5 &  61.2 $\pm$ 3.1\\\hline
- POS $n$-grams &	84.2 $\pm$ 5.3& 13.4 $\pm$ 3.4	& 	19.4 $\pm$ 3.9& 71.0 $\pm$ 3.2\\
-\phantom{hi} + Stylo       & 93.1 $\pm$ 4.7&   9.8 $\pm$ 3.0 & 14.1 $\pm$ 3.3 & 79.2 $\pm$ 2.7  \\\hline
-						
- Char $n$-grams  & 82.0 $\pm$ 7.6 & 7.9 $\pm$ 2.8 & 27.1 $\pm$ 7.6 & 77.3 $\pm$ 2.8 \\			
- \phantom{hi}+ Stylo & 85.4 $\pm$  7.5& 7.6 $\pm$ 3.0 & 24.0 $\pm$ 7.1 & - \\
-\phantom{hi}+ Stylo \& POS & 89.8 $\pm$ 7.1 & \textbf{7.0} $\pm$ 2.7 & 20.1 $\pm$ 6.5 & 82.8 $\pm$ 2.7\\\hline
 
- Word $n$-grams & 73.1 $\pm$ 8.6 & 9.3 $\pm$ 3.2 & 34.6 $\pm$ 8.6 & 77.7 $\pm$ 2.7\\
- \phantom{hi}+ Stylo & 84.7 $\pm$ 7.5 & 8.5 $\pm$ 2.7 & 23.8 $\pm$ 7.2 & - \\
- \phantom{hi}+ Stylo \& POS  & 93.9 $\pm$ 5.8 & 8.3 $\pm$ 3.1 & 14.7 $\pm$ 4.9 & \textbf{83.3} $\pm$ 2.6\\
-\hline
-			
-  Masking (Ch.)\textcolor{red}{$^{*}$} & 92.9 $\pm$ 6.5 & 7.9 $\pm$ 3.2 & 16.1 $\pm$ 5.8  & 80.9 $\pm$ 2.6\\
-  \phantom{hi}+ Stylo \& POS & 97.2 $\pm$ 5.6 & 7.5 $\pm$ 3.2 & 12.2 $\pm$ 4.1 & 83.2  $\pm$ 3.3\\\hline
+Stylo.                      & 63.1 (4.2)  & 15.7 (2.7)  & 21.2 (3.0)  &  61.2 (3.1) \\\hline
+POS $n$-grams               & 72.0 (4.5)  & 11.5 (2.9)  & 16.6 (3.3)  &  71.0 (3.2) \\
+\phantom{hi} + Stylo        & 79.6 (4.0)  & \phantom{0}8.4 (2.6)  & 12.1 (2.8)  &  79.2 (2.7) \\\hline
 
- Masking (W.)  & 89.8 $\pm$ 6.7 & 9.3 $\pm$ 3.4 & 17.9 $\pm$ 6.7 & 77.9 $\pm$ 4.0\\
- \phantom{hi}+ Stylo \& POS & \textbf{97.5} $\pm$ 5.2 & 7.8 $\pm$ 3.2 & \textbf{11.7} $\pm$ 3.7 & 82.8 $\pm$ 3.3\\
+Char $n$-grams              & 70.1 (6.5)  & \phantom{0}6.8 (2.4)  & 23.2 (6.5)  &  77.3 (2.8) \\			
+\phantom{hi}+ Stylo         & 73.0 (6.4)  & \phantom{0}6.5 (2.6)  & 20.5 (6.1)  &  - \\
+\phantom{hi}+ Stylo \& POS  & 76.8 (6.1)  & \phantom{0}\textbf{6.0} (2.3)  & 17.2 (5.6)  &  82.8 (2.7)\\\hline
 
-\hline \hline
- FS BERT   & 38.7 $\pm$ 6.7 & 23.3  $\pm$ 6.6 & 55.0  $\pm$ 10.5 & 37.5 $\pm$ 3.5\\
- BERT AP (K) & 60.3 $\pm$ 8.8 & 9.6 $\pm$ 3.6 & 47.0 $\pm$ 10.0 & 67.3 $\pm$ 4.4\\
- BERT AP (U\textcolor{red}{$^{**}$}) & 60.9 $\pm$ 8.5 & 9.8 $\pm$ 3.7 & 46.3 $\pm$ 10.0 & 71.1 $\pm$ 3.3\\
+Word $n$-grams              & 62.5 (7.4)  & \phantom{0}7.9 (2.7)  & 29.6 (7.4)  &  77.7 (2.7\\
+\phantom{hi}+ Stylo         & 72.4 (6.4)  & \phantom{0}7.3 (2.3)  & 20.3 (6.2)  &  - \\
+\phantom{hi}+ Stylo \& POS  & 80.3 (5.0)  & \phantom{0}7.1 (2.7)  & 12.6 (4.2)  &  \textbf{83.3} (2.6)\\\hline
 
-\hline
- FS RoBERTa & 46.6 $\pm$ 8.8 & 15.3 $\pm$ 6.0 & 55.1 $\pm$ 12.7 & 51.1 $\pm$ 3.4\\
- RoBERTa AP (K) & 67.6 $\pm$ 8.3 & 8.3 $\pm$ 3.4 & 41.0 $\pm$ 9.9 & 70.8 $\pm$ 2.0\\
- RoBERTa AP (U\textcolor{red}{$^{**}$}) & 68.9 $\pm$ 8.3 & 8.0 $\pm$ 3.3 & 40.1 $\pm$ 9.7 & 75.8 $\pm$ 3.8\\
+Masking (Ch.) \textcolor{red}{$^{*}$}               & 79.5 (5.6)  & \phantom{0}6.8 (2.7)  & 13.8 (5.0)  & 80.9 (2.6) \\
+\phantom{hi}+ Stylo \& POS  & 83.1 (4.8)  & \phantom{0}6.4 (2.7)  & 10.4 (3.5)  & 83.2 (3.3)\\\hline
+
+Masking (W.)                & 76.8 (5.7)  & \phantom{0}7.9 (2.9)  & 15.3 (5.7)  & 77.9 (4.0) \\
+\phantom{hi}+ Stylo \& POS  & \textbf{83.3} (4.4)  & \phantom{0}6.7 (2.7)  & \textbf{10.0} (3.2)  & 82.8 (3.3) \\ \hline \hline
+
+FS BERT                     & 33.1 (5.7)  & 19.9 (5.6)  & 47.0 (9.0)  & 37.5 (3.5)\\
+BERT AP (K)                 & 51.6 (7.5)  & \phantom{0}8.2 (3.1)  & 40.2 (8.6)  & 67.3 (4.4)\\
+BERT AP (U)                 & 52.1 (7.3)  & \phantom{0}8.4 (3.2)  & 39.6 (8.5)  & 71.1 (3.3)\\ \hline
+
+FS RoBERTa                  & 39.8 (7.5)  & 13.1 (5.1)  & 47.1 (10.9) &  51.1 (3.4)\\
+RoBERTa AP (K)              & 57.8 (7.1)  & \phantom{0}7.1 (2.9)  & 35.1 (8.5)  &  70.8 (2.0)\\
+RoBERTa AP (U\textcolor{red}{$^{**}$})              & 58.9 (7.1)  & \phantom{0}6.8 (2.8)  & 34.3 (8.3)  &  75.8 (3.8)\\
 
 \hline\hline
- \multirow{1}{*}{\textit{``random chance"}} & 9.4 & 48.7 & 58.5 & 7.7\\\hline
+ \multirow{1}{*}{\textit{``random chance"}} & 8.3 & 41.7 & 50.0 & 7.7\\\hline
 \end{tabular}
 
 \end{table*}
+
+\section{\label{subsec:eval}Evaluation Procedure}
+For each set of features, we used the setup explained in Section~\ref{sec:confTask} to create a 100 different configurations. For each configuration, we randomly ordered the topics, selected 12 out of the 13 available authors, and distributed the authors to the groups. This setting is considered as one single experiment. To account for randomness in the classification algorithm, we repeated every single experiment ten times\footnote{We trained FS BERT and FS RoBERTa only once.}, and reported the average balanced accuracy score and standard deviation.
+
+We decided to omit one author and use the remaining twelve out of the available 13 authors to balance the groups. With this split, the probability of picking the correct author is $\frac{1}{12}$, the likelihood of choosing a wrong author in the same group is $\frac{5}{12}$, and the probability of picking a wrong author in the other group is $\frac{6}{12}$. This case applies if the true author was in either group 1 or group 2. However, suppose we were to use all the 13 authors and divide them into two groups of six and seven authors, respectively. In that case, the probabilities will differ depending on whether the actual author is in the group with six authors or seven authors. In that case, we will need to re-weight the errors based on their probability, and that will complicate the results as we will not be talking about the exact number of samples.  
+
+After creating the training, validation, and testing sets we train models for authorship attribution. First, the features are extracted from the writing samples. Second, a classification model is trained on the training samples, tuned on the validation set to pick the best hyperparameters, and tested on the testing set. Note that the classifier does not have access to any information about the setup, such as the groups configuration or the topic labels. 
+
 
 \section{Results and Discussion}
 \subsection{Topic Confusion Task}
 Table~\ref{tbl:topicConf} shows the results on the topic confusion task using the proposed measured in section~\ref{subsec:proposed}. Correct is the percentage of samples that were correctly classified, same-group error is the percentage of samples that were attributed to the wrong author but within the same group as the correct author, and finally cross-group error is the percentage of samples that were attributed to the wrong author and to the author group that does not contain the correct author ---caused by the change in the topic---. 
 
-We start by comparing the standard features in authorship attribution: (1) stylometric vs. (4) character- and (7) word-level $n$-gram features. We see why stylometric features were out-favoured by $n$-gram features if we look only at the accuracy. Character $n$-grams achieve higher accuracy while word-level $n$-grams perform similarly but are easier to collect and do not require adapting between different languages or media. However, splitting the error shows that stylometric features have the lowest cross-group error caused by the topic shift. The topic shift does not cause the low performance of stylometric features but rather because they partially capture the writing style.
+\paragraph{Classical Features with SVM.}
+Compared to stylometric features, a classifier using character $n$-grams would correctly classify more samples. However, splitting the error shows that using stylometric features will lead to a lower cross-group error, which is associated with the topic shift. Here, the topic shift does not cause the low performance of stylometric features but rather because they partially capture the writing style.
 
-When looking at (4) character- vs (7) word-level $n$-grams, we see that they have comparable same-group errors while cross-group error is much higher for word $n$-grams. Our results are in line with the literature on the classical cross-topic authorship scenario, which shows that character $n$-grams outperform word $n$-grams while still capturing the topic, which makes character $n$-grams less influenced by the topic in the attribution task.
+When looking at character- vs word-level $n$-grams, we see that they have comparable same-group errors while cross-group error is much higher for word $n$-grams. Our results are in line with the literature on the classical cross-topic authorship scenario, which shows that character $n$-grams outperform word $n$-grams while still capturing the topic, which makes character $n$-grams less influenced by the topic in the attribution task.
 
-Furthermore, all the classical features (1, 2, 4, and 7) Part-Of-Speech $n$-grams have the highest accuracy and the lowest topic bias (cross-group error). This outcome is intuitive as POS tags are not content words. Still, their same-group error is higher than character- and word-level $n$-grams, which explains why researchers preferred $n$-gram features over them for authorship attribution.  
+% Furthermore, all the classical features (1, 2, 4, and 7) Part-Of-Speech $n$-grams have the highest accuracy and the lowest topic bias (cross-group error). This outcome is intuitive as POS tags are not content words. Still, their same-group error is higher than character- and word-level $n$-grams, which explains why researchers preferred $n$-gram features over them for authorship attribution.  
 
-Next, we look at the effect of masking as a preprocessing technique. Specifically, we compare character- and word-level $n$-gram features before (4 and 7) and after masking (10 and 12). Masking infrequent words is evident in the cross-group error between character $n$-grams and masking on the character-level as well as the word $n$-grams and masking on the word level. Table~\ref{tbl:topicConf} shows the same-group error remained fixed while cross-group error decreased by 11 and 17 samples for the character- and the word-level, respectively. 
+Next, we look at the effect of masking as a preprocessing technique. Specifically, we compare character- and word-level $n$-gram features before and after masking. Masking infrequent words is evident in the cross-group error between character $n$-grams and masking on the character-level as well as the word $n$-grams and masking on the word level. Table~\ref{tbl:topicConf} shows the same-group error remained fixed while cross-group error decreased by 11 and 17 samples for the character- and the word-level, respectively. 
 
 % \paragraph{Combining features.} One advantage to using hand-engineered features on the sample level is that these features can easily be combined. First, we combined the stylometric features and POS $n$-grams and observed (3) a decrease in both same- and cross-group errors, which translates to better writing style representation and lower topical bias. 
 
-Next, we evaluated the effect of combining both stylometric features and POS $n$-gram features with character- and word-level $n$-grams with and without masking (rows 6, 9, 11, and 13). The results of combining both stylometric features and POS $n$-grams with all the other features have decreased the cross-group error significantly, which resembles less confusion over the topic. On the other hand, the same-group error was reduced by merely one sample at max in most cases. 
+\paragraph{Combining features.}
+We evaluated the effect of combining both stylometric features and POS $n$-gram features with character- and word-level $n$-grams with and without masking. The results of combining both stylometric features and POS $n$-grams with all the other features have decreased the cross-group error significantly, which resembles less confusion over the topic. On the other hand, the same-group error was reduced by merely one sample at max in most cases. 
 
-It is worth noting that masking on the character level performed better than masking on the word level without any additional features. In contrast, when stylometric features and POS $n$-grams are added to both masking approaches, the word-level masking performs better.
+% It is worth noting that masking on the character level performed better than masking on the word level without any additional features. In contrast, when stylometric features and POS $n$-grams are added to both masking approaches, the word-level masking performs better.
 
-\paragraph{Pretrained Language Models.} These models performed very poorly on this topic confusion task (rows 14 to 19) regardless of the attribution approach being used with them. In all cases, the same-group error representing the capacity to capture the writing style was on par with character- and word-level $n$-grams, while the cross-group error is double in some cases. 
+\paragraph{Pretrained Language Models.} Surprisingly, such models performed very poorly on this topic confusion task regardless of the attribution approach being used with them. According to the results, these models have a much larger cross-group error which is associated with the topic shift. 
 
-Indeed, pretrained neural language models are not suited for authorship attribution. Their goal is to learn word representations that capture the similarity between words that appear in a similar context, something that one-hot encoding does not capture. In authorship, however, words must both appear in the same context and be used by that author to have similar representations. For example, `color' and `colour' are the same word but with different spelling based on whether American or British English is being used. Ideally, these two words would have very similar embeddings, if not identical ones. The distinction between the two is critical because it indicates the author's identity or the language system they use. Authorship attribution techniques highlight these differences and use them to identify the most plausible author of an anonymous document. 
+One potential explanation for this behavior is that in authorship attribution, two words would have similar embeddings if they appear in a similar context \textit{and} are used by the author in their writing samples. Consider the words `color' and `colour' for example. These are essentially the same word but with different spelling based on whether American or British English is being used. Ideally, these two words would have very similar embeddings, if not identical ones. The distinction between the two is critical because it indicates the author's identity or the language system they use. Authorship attribution techniques highlight these differences and use them to identify the most plausible author of an anonymous document. 
 
 \subsection{Comparing the Performance on the Cross-Topic Scenario}
-To validate our findings in a realistic scenario, we compare the performance in the cross-topic scenario on the Guardian dataset. Note that it is common to do the evaluation on one of the two cross-topic authorship attribution datasets~\citep{goldstein2009person,Stamatatos.E:2013} similar to~ \citep{goldstein2009person,Sapkota.U:2014,Stamatatos.E:2017, stamatatos2018masking,Barlas2020,Barlas2021}
+We use the cross-topic scenario on the Guardian dataset to compare the performance of different attribution models to that on the topic-confusion task. Note that it is common to do the evaluation on one of the two cross-topic authorship attribution datasets~\citep{goldstein2009person,Stamatatos.E:2013} similar to~ \citep{goldstein2009person,Sapkota.U:2014,Stamatatos.E:2017, stamatatos2018masking,Barlas2020,Barlas2021}
 
 % \begin{table}[htb]
 % \caption{\label{tbl:Xtopic}Results on the traditional, cross-topic scenario. \textbf{Boldface} indicates the best result per column. ($\uparrow$ Higher is better. \textcolor{red}{$^{*}$}State of the art. \textcolor{red}{$^{**}$} Has access to the (unlabeled) test set.)}
@@ -392,12 +398,14 @@ To validate our findings in a realistic scenario, we compare the performance in 
 % \end{tabular}
 % \end{table}
 
-Table~\ref{tbl:Xtopic} shows that a combination of stylometric features, POS- and word-level $n$-grams (7), outperforms the state-of-the-art, which is (8) masking the least frequent words followed by word-level $n$-gram features. Adding stylometric features and POS-level $n$-grams to (9) masking (Ch) and (11) masking (W) also achieved better performance than state of the art. Still, the difference was statistically significant only when we compared (8) masking (Ch.) and (7) ($P=0.04$). Appendix~\ref{additional} contains the experimental setup, detailed results and analysis supported with statistical significance tests and an ablation study on the cross-topic scenario.
+The last column of Table~\ref{tbl:topicConf} shows a similar trend to the topic-confusion task where combining stylometric features and POS-level $n$-grams to other classical features results in better authorship attribution. Notably, the combination of stylometric features, POS- and word-level $n$-grams outperforms the state-of-the-art. Additionally, adding stylometric features and POS-level $n$-grams to masking (Ch) and masking (W) achieved better performance than state of the art, but the difference was statistically significant only when we comparing with masking (Ch.) ($P=0.04$). Appendix~\ref{additional} contains the experimental setup, detailed results and analysis supported with statistical significance tests and an ablation study on the cross-topic scenario.
 
-It is essential to highlight how current results do not shed light on the capacity of features. Table~\ref{tbl:Xtopic} shows similar accuracy scores for different techniques. Conversely, the topic confusion task reveals completely different behaviour for each feature. 
+Finally, consider two completely different approaches to authorship attribution, namely BERT AP (U) and a linear SVM with POS-level $n$-grams. Now, note how the accuracy alone on the cross-topic scenario does not provide any insights on why these two models perform very similarly. In contrast, the cross-group error in the topic-confusion task shows that a linear SVM with POS-level $n$-grams has a much lower error, hence, less affected by the change in topic compared to BERT AP (U).
+
+% It is essential to highlight how current results do not shed light on the capacity of features. Table~\ref{tbl:Xtopic} shows similar accuracy scores for different techniques. Conversely, the topic confusion task reveals completely different behaviour for each feature. 
 
 \section{Conclusion}
-In this work, we proposed the topic confusion task, which helps test the capacity of features in capturing the writing style while being influenced by the topic in authorship attribution. Additionally, it could help in understanding the cause of the errors in authorship attribution. We verified the outcomes of this task on the cross-topic authorship attribution scenario. We showed that a simple linear classifier with stylometric features and POS tags could improve the authorship attribution performance compared to the commonly used $n$-grams. We achieved a new state-of-the-art of 83.3\% on the cross-topic scenario by resurrecting stylometric features and combining them with POS tags and word-level $n$-grams, 3\% over the previous state-of-the-art, masking-based, character-level approach. When neurally-inspired techniques are very appealing in all domains, we showed that the simple, hand-crafted stylometric features combined with POS tags better capture the writing style than these pretrained language models. 
+In this work, we proposed the topic confusion task, which helps us characterize the errors made by the authorship attribution models with respect to the topic. Additionally, it could help in understanding the cause of the errors in authorship attribution. We verified the outcomes of this task on the cross-topic authorship attribution scenario. We showed that a simple linear classifier with stylometric features and POS tags could improve the authorship attribution performance compared to the commonly used $n$-grams. We achieved a new state-of-the-art of 83.3\% on the cross-topic scenario by resurrecting stylometric features and combining them with POS tags and word-level $n$-grams, 3\% over the previous state-of-the-art, masking-based, character-level approach. Surprisingly, neurally-inspired techniques did not perform well on the authorship attribution task. Instead, they were outperformed by a simple, hand-crafted set of stylometric features and POS-level $n$-grams and an SVM classifier with a linear kernel. 
 
 % \section*{Acknowledgments}
 % The acknowledgments should go immediately before the references.  Do
