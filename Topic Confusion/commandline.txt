@@ -1,0 +1,37 @@
+#args:
+1- --dataset_path: the folder that contains the topics
+2- --dataset_name: keep it unchanged: 4_Guardian_new
+3- --vocab_source: keep it unchanged: BNC (must be in the same folder as 4_Guardian_new)
+4- --epochs: We used 100 in our experiments
+
+
+Warning!!!
+The following script will run all the experiments in table 2, which take will take DAYS to finish. 
+We suggest that you comment out subsections in the main.py file. The sections are neatly marked as regions and the can be easily spotted. Ex: 
+
+## region 4.b Masked word	
+Ns = [1, 2, 3]
+Fts = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+Ks = [100, 200, 300, 400, 500, 1000, 2000, 3000, 4000, 5000]
+best_n, best_ft, best_k, best_num_feats, best_valid_acc, preds_train, preds_tests \
+                = tune_masked_word(Ns, Fts, Ks, train_x_raw, y_train, valid_x_raw, y_valid,
+                  train_x_stylo_raw, valid_x_stylo_raw, with_stylo=True, with_pos=True)
+
+train_x_masked_word, tests_x_masked_word = tune_masked_word([best_n], [best_ft], [best_k],
+                                           train_x_raw, y_train, tests_x_raw, y_tests,
+                                           train_x_stylo_raw, valid_x_stylo_raw,
+                                           with_stylo=True, with_pos=True,
+                                           return_best=True)
+
+info2print = [epoch, 'masked_word', best_n, best_ft, best_k, best_valid_acc]
+s2write = fitter10Times(info2print, train_x_masked_word, tests_x_masked_word, y_train, y_tests,
+                                    random_authors)
+print(s2write)
+s2write += '\r'
+outFi.writelines(s2write)
+outFi.flush()
+## endregion
+
+
+Script (copy-pasta to the command line):
+python main.py --dataset_path "<path_to_data>" --dataset_name 4_Guardian_new --vocab_source BNC --epochs 100
