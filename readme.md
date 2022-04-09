@@ -8,14 +8,11 @@
     <td><img src="/images/Picture4.png" alt="" height=160 width=300 /></td>
   </tr>
   <tr>
-    <td align="center">Same-Topic</td>
-    <td align="center">Cross-Topic</td>
-    <td align="center">Topic Confusion</td>
+    <td align="center">&nbsp;&nbsp;&nbsp;&nbsp;Same-Topic</td>
+    <td align="center">&nbsp;&nbsp;&nbsp;&nbsp;Cross-Topic</td>
+    <td align="center">&nbsp;&nbsp;&nbsp;&nbsp;Topic Confusion</td>
   </tr>
 </table>
-
-
-
 
 1. Each folder contians Code/*/commandline__.txt which contains commands to run the experiments from cmd.
 
@@ -25,7 +22,7 @@
 <table border="1" align="center">
   
   <tr>
-    <td><img src="/images/Presentation1.png" alt="" height=300 width=450 /></td>    
+    <td><img src="/images/Presentation1.png" alt="" height=400 width=800 /></td>    
   </tr>
 </table>
 
@@ -33,3 +30,11 @@
 
 2. new_model.py is used to create a new model.
 
+<h2>Don't forget to cite our paper!</h2>
+@inproceedings{altakrori2021topic,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;title={The Topic Confusion Task: A Novel Evaluation Scenario for Authorship Attribution},<br>  
+&nbsp;&nbsp;&nbsp;&nbsp;author={Altakrori, Malik and Cheung, Jackie Chi Kit and Fung, Benjamin CM},<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;booktitle={Findings of the Association for Computational Linguistics: EMNLP 2021},<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;pages={4242--4256},<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;year={2021}<br>   
+}
