@@ -31,10 +31,10 @@
 2. new_model.py is used to create a new model.
 
 <h2>Don't forget to cite our paper!</h2>
-@inproceedings{altakrori2021topic,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;title={The Topic Confusion Task: A Novel Evaluation Scenario for Authorship Attribution},<br>  
-&nbsp;&nbsp;&nbsp;&nbsp;author={Altakrori, Malik and Cheung, Jackie Chi Kit and Fung, Benjamin CM},<br> 
-&nbsp;&nbsp;&nbsp;&nbsp;booktitle={Findings of the Association for Computational Linguistics: EMNLP 2021},<br> 
-&nbsp;&nbsp;&nbsp;&nbsp;pages={4242--4256},<br> 
-&nbsp;&nbsp;&nbsp;&nbsp;year={2021}<br>   
+@inproceedings{<b>altakrori2021topic</b>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<b>title</b>={The Topic Confusion Task: A Novel Evaluation Scenario for Authorship Attribution},<br>  
+&nbsp;&nbsp;&nbsp;&nbsp;<b>author</b>={Altakrori, Malik and Cheung, Jackie Chi Kit and Fung, Benjamin CM},<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;<b>booktitle</b>={Findings of the Association for Computational Linguistics: EMNLP 2021},<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;<b>pages</b>={4242--4256},<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;<b>year</b>={2021}<br>   
 }
