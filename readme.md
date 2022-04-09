@@ -1,5 +1,10 @@
 
 <h1>The Topic Confusion Task - EMNLP 2021 (Findings)</h1>
+
+1. [Cross Topic/commandline__.txt](/Cross%20Topic/commandline%20to%20call%20the%20code.txt) contains commands to run the experiments from cmd.
+
+2. There might be additional packages that should be installed, such as the StanfordNLP tokenizer, and scikit-learn. 
+
 <h2>Cross-Topic Authorship Attribution</h2>
 <table border="1" align="center">
   <tr>
@@ -14,10 +19,6 @@
   </tr>
 </table>
 
-1. Each folder contians Code/*/commandline__.txt which contains commands to run the experiments from cmd.
-
-2. There might be additional packages that should be installed, such as the StanfordNLP tokenizer, and scikit-learn. 
-
 <h2>The Topic Confusion Task</h2>
 <table border="1" align="center">
   
@@ -26,9 +27,14 @@
   </tr>
 </table>
 
-1. main.py has all the baselines/methods from the paper to create Table 2. However, certain sections should be commented out to avoid running the code for too long (magnitude of days).
+1. [Topic confusion/commandline.txt](/Topic%20Confusion/commandline.txt) contains commands to run the experiments from cmd.
+ 
+2. [Topic confusion/main.py](/Topic%20Confusion/main.py) has all the baselines/methods from the paper to create Table 2. However, certain sections should be commented out to avoid running the code for too long (magnitude of days).
 
-2. new_model.py is used to create a new model.
+3. [Topic confusion/new_model.py](/Topic%20Confusion/new_model.py) Topic is used to create a new model.
+
+<h2>Data</h2>
+Instructions can be found [here](https://malikaltakrori.github.io/publications/TCT/)
 
 <h2>Don't forget to cite our paper!</h2>
 @inproceedings{<b>altakrori2021topic</b>,<br>
