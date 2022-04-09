@@ -1,0 +1,64 @@
+#args:
+1- --dataset_path: the folder that contains the topics
+2- --dataset_name: keep it unchanged: 4_Guardian_new
+3- --ngram_level: word for Word-level n-grams, or char for character-level n-grams
+4- --mask_digits: converts each digit to #, e.g. 12.4 ==> ##.#
+
+
+Scripts (copy-pasta to the command line):
+1- Stylo + POS + word level ngrams:
+python ngram_all_w.py --dataset_path <path_to_data> --dataset_name 4_Guardian_new --ngram_level word
+
+2- Stylo + POS + character level ngrams:
+python ngram_all_ch.py --dataset_path <path_to_data> --dataset_name 4_Guardian_new --ngram_level char 
+
+3- Masking, word-level
+python masking_w.py --dataset_path <path_to_data> --dataset_name 4_Guardian_new --mask_digits --vocab_source BNC --ngram_level word 
+
+4- Masking, char-level
+python masking_ch.py --dataset_path <path_to_data> --dataset_name 4_Guardian_new --mask_digits --vocab_source BNC --ngram_level char 
+
+5- Stylometric
+python stylometric.py --dataset_path <path_to_data> --dataset_name 4_Guardian_new 
+
+6- Stylo + POS 
+python stylometric_POS.py --dataset_path <path_to_data>  --dataset_name 4_Guardian_new 
+
+7- word-level n-grams:
+python ngrams_w.py --dataset_path <path_to_data> --dataset_name 4_Guardian_new --mask_digits
+
+8- character-level n-grams:
+python ngrams_ch.py --dataset_path <path_to_data> --dataset_name 4_Guardian_new --mask_digits
+
+9- Stylo + POS + Masking, word-level 
+python masking_all_w.py --dataset_path <path_to_data> --dataset_name 4_Guardian_new --mask_digits --vocab_source BNC --ngram_level word 
+
+10- Stylo + POS + Masking, chararcter-level 
+python masking_all_w.py --dataset_path <path_to_data> --dataset_name 4_Guardian_new --mask_digits --vocab_source BNC --ngram_level char
+
+# Neural Models:
+python main.py --model bert --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_1
+python main.py --model bert --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_2
+python main.py --model bert --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_3
+python main.py --model bert --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_4
+python main.py --model bert --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_5
+python main.py --model bert --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_6
+python main.py --model bert --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_7
+python main.py --model bert --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_8
+python main.py --model bert --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_9
+python main.py --model bert --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_10
+python main.py --model bert --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_11
+python main.py --model bert --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_12
+
+python main.py --model roberta --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_1
+python main.py --model roberta --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_2
+python main.py --model roberta --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_3
+python main.py --model roberta --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_4
+python main.py --model roberta --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_5
+python main.py --model roberta --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_6
+python main.py --model roberta --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_7
+python main.py --model roberta --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_8
+python main.py --model roberta --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_9
+python main.py --model roberta --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_10
+python main.py --model roberta --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_11
+python main.py --model roberta --batch_size 32 --finetune --epochs 500 --classify author --case cross_topic_12
