@@ -34,7 +34,7 @@
 3. [Topic confusion/new_model.py](/Topic%20Confusion/new_model.py) Topic is used to create a new model.
 
 <h2>Data</h2>
-Instructions can be found [here](https://malikaltakrori.github.io/publications/TCT/)
+We do not have the rights to share the actual data as per the Guardian API policy. Detailed instructions to collect the data can be found <a href=https://malikaltakrori.github.io/publications/TCT/>here</a>
 
 <h2>Don't forget to cite our paper!</h2>
 @inproceedings{<b>altakrori2021topic</b>,<br>
